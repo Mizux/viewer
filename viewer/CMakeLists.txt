@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 2.8)
+project(Viewer)
+
+# Qt Setting
+find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
+include(${QT_USE_FILE})
+
+# OpenSceneGraph Setting
+find_package(OpenSceneGraph 2.8 REQUIRED COMPONENTS osg osgViewer)
+include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+include_directories("include")
+
+# The file list for this project
+set(_HDRS
+	include/viewer/adapter_widget.hpp
+	include/viewer/image_viewer_2d.hpp
+	include/viewer/image_viewer_2d_widget.hpp
+	include/viewer/image_viewer_3d.hpp
+	include/viewer/image_viewer_3d_widget.hpp
+	include/viewer/osg_headers.hpp
+	include/viewer/point_cloud_geometry.hpp
+	include/viewer/tools.hpp
+  )
+qt4_wrap_cpp(_MOC_SRCS ${_HDRS})
+
+set(_SRCS
+  src/adapter_widget.cpp
+  src/image_viewer_2d.cpp
+  src/image_viewer_2d_widget.cpp
+  src/image_viewer_3d.cpp
+  src/image_viewer_3d_widget.cpp
+  src/point_cloud_geometry.cpp
+  src/tools.cpp
+	)
+
+add_library(${PROJECT_NAME} SHARED ${_HDRS} ${_SRCS} ${_MOC_SRCS})
+target_link_libraries(${PROJECT_NAME}
+	${OPENSCENEGRAPH_LIBRARIES}
+	${QT_LIBRARIES})
+install(TARGETS ${PROJECT_NAME} DESTINATION .)
