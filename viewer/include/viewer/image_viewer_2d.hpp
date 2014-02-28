@@ -5,48 +5,40 @@
 
 #include <QtGui/QWidget>
 #include <QtGui/QVBoxLayout>
-#include <Marshallable/Common/Image2D.h>
 
-#include "DataGrabberGUI/OSGHeaders.hpp"
-#include "DataGrabberGUI/AdapterWidget.hpp"
+#include "osg_headers.hpp"
+#include "adapter_widget.hpp"
 
-namespace DataGrabberGUI
+namespace Viewer
 {
-	//! @class C2DImageViewer
-	class C2DImageViewer : public ViewerQT
-	{
-		Q_OBJECT
+//! @class C2DImageViewer
+class ImageViewer2D : public ViewerQT
+{
+    Q_OBJECT
 
-			C2DImageViewer(const C2DImageViewer&);
-		// intentionally undefined
-		C2DImageViewer& operator=(const C2DImageViewer&);
+    ImageViewer2D(const ImageViewer2D&);
+    // intentionally undefined
+    ImageViewer2D& operator=(const ImageViewer2D&);
 
-		public:
-			//! @brief Constructor.
-			C2DImageViewer(QWidget *parent = 0);
-	
-			//! @brief Destructor.
-			virtual ~C2DImageViewer();
+  public:
+    //! @brief Constructor.
+    ImageViewer2D(QWidget *parent = 0);
 
-			public slots:
-			bool slotSet2DImage(
-					const SharedData::Common::CImage2D& p_o2DImage,
-					const bool p_bUseCoordinate=false);
+    //! @brief Destructor.
+    virtual ~ImageViewer2D();
 
-			bool slotSet2DImages(
-					const std::vector<SharedData::Common::CImage2D *>& p_arpo2DImages,
-					const bool p_bUseCoordinate=false);
+  public slots:
+    bool slotSet2DImage(const QImage& image);
 
-	private:
-			bool addImage(
-					const SharedData::Common::CImage2D& p_o2DImage,
-					const bool p_bUseCoordinate=false);
+    bool slotSet2DImages(const QVector<QImage>& images);
 
-		// Viewer OSG
-		osg::ref_ptr<osg::Group> m_poRootNode;
+  private:
+    bool _addImage(const QImage& image);
 
-		void SetupWidget();			
-	};
+    void _setupWidget();
+
+    osg::ref_ptr<osg::Group> _rootNode;
+};
 } // DataGrabberGUI
 
 #endif // end of include guard: 2D_IMAGE_VIEWER_HPP

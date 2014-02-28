@@ -1,328 +1,188 @@
-/// @file
+//! @file
 
-#include <Marshallable/Common/Image2DRAW.h>
-#include <Marshallable/Common/Image2DRGB.h>
-#include <Marshallable/Common/Image2DLuminance.h>
+#include <viewer/image_viewer_2d.hpp>
 
-#include "LogDefine.h"
-#include "DataGrabberGUI/ErrorMessage.hpp"
-#include "DataGrabberGUI/2DImageViewer.hpp"
+namespace Viewer
+{
 
-
-using namespace DataGrabberGUI;
-
-C2DImageViewer::C2DImageViewer(QWidget *parent) :
+ImageViewer2D::ImageViewer2D(QWidget *parent) :
 	ViewerQT(parent),
-	m_poRootNode(0)
+  _rootNode(0)
 {
-#ifdef GUI_2DIMAGEVIEWER_DEBUG
-	std::cerr << "GUI_DEBUG : Constructor C2DImageViewer" << std::endl;
-#endif
-	SetupWidget();
+  _setupWidget();
 }
 
-C2DImageViewer::~C2DImageViewer()
+ImageViewer2D::~ImageViewer2D()
 {
-#ifdef GUI_2DIMAGEVIEWER_DEBUG
-	std::cerr << "GUI_DEBUG : Destructor C2DImageViewer" << std::endl;
-#endif
 }
 
-bool C2DImageViewer::slotSet2DImage(
-		const SharedData::Common::CImage2D& p_o2DImage,
-		const bool p_bUseCoordinate)
+bool ImageViewer2D::slotSet2DImage(const QImage& image)
 {
 	//! Remove old Images Node if exist from Root Node.
-	m_poRootNode->removeChildren(0, m_poRootNode->getNumChildren()) ;
+  _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
 	//! Build and Add New Image to Scene
-	addImage(p_o2DImage, p_bUseCoordinate);
+  _addImage(image);
 
 	return true;
 }
 
-bool C2DImageViewer::slotSet2DImages(
-		const std::vector<SharedData::Common::CImage2D *>& p_arpo2DImages,
-		const bool p_bUseCoordinate)
+bool ImageViewer2D::slotSet2DImages(const QVector<QImage>& images)
 {
 	//! Remove old Images Node if exist from Root Node.
-	m_poRootNode->removeChildren(0, m_poRootNode->getNumChildren()) ;
+  _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
-	//! Build and Add New Images to Scene
-	std::cerr << "2DViewer: Nb images to Display" << p_arpo2DImages.size() << std::endl;
-	for (unsigned int uiLoop =0; uiLoop < p_arpo2DImages.size(); uiLoop++)
+  //! Build and Add New Images to Scene
+  bool result = true;
+  for (int i=0; i < images.size(); ++i)
 	{
-		addImage(*(p_arpo2DImages[uiLoop]), p_bUseCoordinate);
+    if (!_addImage(images[i]))
+      result = false;
 	}
 
-	return true;
+  return result;
 }
 
-bool C2DImageViewer::addImage(
-		const SharedData::Common::CImage2D& p_o2DImage,
-		const bool p_bUseCoordinate)
+bool ImageViewer2D::_addImage(const QImage& image)
 {
-	using namespace SharedData::Common;
-	
 	//! Create Image object.
-	osg::ref_ptr<osg::Image> poImage = new osg::Image;
+  osg::ref_ptr<osg::Image> imagePtr = new osg::Image;
 
 	//! Create Texture and add it the Image object. 
-	osg::ref_ptr<osg::Texture2D> poTexture2D = new osg::Texture2D;
+  osg::ref_ptr<osg::Texture2D> texture2dPtr = new osg::Texture2D;
 	{
-		poTexture2D->setDataVariance(osg::Object::STATIC);
+    texture2dPtr->setDataVariance(osg::Object::STATIC);
 		//! Use NEAREST Filter to avoid 2D Interpolation.
-		poTexture2D->setFilter(
+    texture2dPtr->setFilter(
 				osg::Texture2D::MIN_FILTER,
 				osg::Texture2D::NEAREST);
-		poTexture2D->setFilter(
+    texture2dPtr->setFilter(
 				osg::Texture2D::MAG_FILTER,
 				osg::Texture2D::NEAREST);
 
 		//! Clamp Texture (no tiling).
-		poTexture2D->setWrap(
+    texture2dPtr->setWrap(
 				osg::Texture2D::WRAP_S,
 				osg::Texture2D::CLAMP);
-		poTexture2D->setWrap(
+    texture2dPtr->setWrap(
 				osg::Texture2D::WRAP_T,
-				osg::Texture2D::CLAMP);
+        osg::Texture2D::CLAMP);
+
 		//! Keep Input Resolution no Interpolation to \f$2^n*2^m\f$.
-		poTexture2D->setResizeNonPowerOfTwoHint(false);
-		poTexture2D->setImage(poImage.get());
+    texture2dPtr->setResizeNonPowerOfTwoHint(false);
+    texture2dPtr->setImage(imagePtr.get());
 	}
 
 	//! Create StateSet and add it the Texture object.
-	osg::ref_ptr<osg::StateSet> poStateSet = new osg::StateSet;
+  osg::ref_ptr<osg::StateSet> stateSetPtr = new osg::StateSet;
 	{
-		poStateSet->setTextureAttributeAndModes(
+    stateSetPtr->setTextureAttributeAndModes(
 				0,
-				poTexture2D.get(),
+        texture2dPtr.get(),
 				osg::StateAttribute::ON);
 		//! Active Culling to not see the "back" of the texture.
-		poStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+    stateSetPtr->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 		//! Desactivate Lightning (we want to see the image color value!).
-		poStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    stateSetPtr->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	}
 
-	//! Create Geode Object object.
-	osg::ref_ptr<osg::Geode> poGeode = new osg::Geode;
-	
 	//! Create PAT Object object.
-	osg::ref_ptr<osg::PositionAttitudeTransform> poPAT = new osg::PositionAttitudeTransform;
-	poPAT->addChild(poGeode.get());
+  osg::ref_ptr<osg::PositionAttitudeTransform> patPtr = new osg::PositionAttitudeTransform;
 
-	//! Get Image Property
-	int iWidth = p_o2DImage.GetWidth();
-	int iHeight = p_o2DImage.GetHeight();
+  //! Create Geode Object object.
+  osg::ref_ptr<osg::Geode> geodePtr = new osg::Geode;
+  patPtr->addChild(geodePtr.get());
 
 	//! Fill Image object with the 2D Image parameter
-	if (IMAGE2D_RAW == p_o2DImage.GetType())
+  if (QImage::Format_RGB16 == image.format())
 	{
-		std::cerr << "2DViewer: RAW Image" << std::endl;
-		CImage2DRAW &o2DImageRAW =
-			const_cast<CImage2DRAW &>(
-					static_cast<const CImage2DRAW &>(p_o2DImage));
+    unsigned char *buffer = new unsigned char[image.width()*image.height()*2];
+    ::memcpy(buffer, image.bits(), image.width()*image.height()*2);
 
-		unsigned short usTmp;
-		unsigned short *pusBuffer = new unsigned short[iWidth*iHeight];
-		for (int iLoop=0; iLoop < iWidth*iHeight; iLoop++)
-		{
-			// ptr() return a char * pointer
-			usTmp = *reinterpret_cast<unsigned short *>(
-					o2DImageRAW.GetRefBayer().ptr()+2*iLoop);
-			pusBuffer[iLoop] = usTmp << 6;
-		}
-
-		poImage->setImage(
-				iWidth,
-				iHeight,
+    imagePtr->setImage(
+        image.width(),
+        image.height(),
 				0,
-				GL_LUMINANCE16,
-				GL_LUMINANCE,
-				GL_UNSIGNED_SHORT,
-				reinterpret_cast<unsigned char *>(pusBuffer),
+        GL_RGB,
+        GL_RGB,
+        GL_UNSIGNED_SHORT_5_6_5,
+        buffer,
 				osg::Image::USE_NEW_DELETE); 
-		poTexture2D->dirtyTextureObject();
 	}
-	else if (IMAGE2D_RGB == p_o2DImage.GetType())
+  else if (QImage::Format_RGB888 == image.format())
 	{	
-		std::cerr << "2DViewer: RGB Image" << std::endl;
-		CImage2DRGB &o2DImageRGB =
-			const_cast<CImage2DRGB &>(
-					static_cast<const CImage2DRGB &>(p_o2DImage));
+    unsigned char *buffer = new unsigned char[image.width()*image.height()*4];
+    ::memcpy(buffer, image.bits(), image.width()*image.height()*4);
 
-		unsigned char *pucBuffer = new unsigned char[iWidth*iHeight*3];
-		for (int iLoop=0; iLoop < iWidth*iHeight; iLoop++)
-		{
-			// Write Red
-			pucBuffer[3*iLoop+0] = 
-				static_cast<unsigned char>(
-						*(o2DImageRGB.GetRefRed().ptr()+iLoop));
-			// Write Green
-			pucBuffer[3*iLoop+1] = 
-				static_cast<unsigned char>(
-						*(o2DImageRGB.GetRefGreen().ptr()+iLoop));
-			// Write Blue
-			pucBuffer[3*iLoop+2] = 
-				static_cast<unsigned char>(
-						*(o2DImageRGB.GetRefBlue().ptr()+iLoop));
-		}
-
-		poImage->setImage(
-				iWidth,
-				iHeight,
+    imagePtr->setImage(
+        image.width(),
+        image.height(),
 				0,
-				GL_RGB,
-				GL_RGB,
-				GL_UNSIGNED_BYTE,
-				pucBuffer,
+        GL_RGB,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        buffer,
 				osg::Image::USE_NEW_DELETE); 
-		poTexture2D->dirtyTextureObject();
 	}
-	else if (IMAGE2D_LUMINANCE == p_o2DImage.GetType())
+  else if (QImage::Format_ARGB32 == image.format())
 	{	
-		std::cerr << "2DViewer: Luminance Image" << std::endl;
-		CImage2DLuminance &o2DImageLuminance =
-			const_cast<CImage2DLuminance &>(
-					static_cast<const CImage2DLuminance &>(p_o2DImage));
+    unsigned char *buffer = new unsigned char[image.width()*image.height()*4];
+    ::memcpy(buffer, image.bits(), image.width()*image.height()*4);
 
-		unsigned char *pucBuffer = new unsigned char[iWidth*iHeight];
-		for (int iLoop=0; iLoop < iWidth*iHeight; iLoop++)
-		{
-			pucBuffer[iLoop] = 
-				static_cast<unsigned char>(
-						*(o2DImageLuminance.GetRefLuminance().ptr()+iLoop));
-		}
-
-		poImage->setImage(
-				iWidth,
-				iHeight,
+    imagePtr->setImage(
+        image.width(),
+        image.height(),
 				0,
-				GL_LUMINANCE,
-				GL_LUMINANCE,
-				GL_UNSIGNED_BYTE,
-				pucBuffer,
+        GL_RGBA,
+        GL_RGBA,
+        GL_UNSIGNED_INT_8_8_8_8,
+        buffer,
 				osg::Image::USE_NEW_DELETE); 
-		poTexture2D->dirtyTextureObject();
 	}
 	else
 	{
-		std::cerr << "2DViwer: Image Type Unknow" << std::endl;
-	}
+    std::cerr << "Image Format unsupported" << std::endl;
+    return false;
+  }
+  texture2dPtr->dirtyTextureObject();
 
 	//! Create New image and add it to the Root Node.
-	osg::ref_ptr<osg::Drawable> poDrawable;
-	if (!p_bUseCoordinate)
-	{
-		//! Create Drawable object.
-		poDrawable = CreateImage(iWidth, iHeight);
-	}
-	else
-	{
-		//! Place Image according to Parameters 
-		float fRatio = 1000.0f;
-		
-		long lSensorIndex = 0;
-		float fPositionX = 0.0f;
-		float fPositionY = 0.0f;
-		float fWidth = iWidth;
-		float fHeight = iHeight;
-		double dTmp;
-
-		//! Read Image MetaData
-		SharedData::Common::ImageMetaDataFacade oImageMetaData;
-		oImageMetaData = p_o2DImage.GetImageMetaData();
-		
-		oImageMetaData.GetLongValue(
-				IMAGE_CAMERA_INDEX,
-				lSensorIndex);
-
-		oImageMetaData.GetDoubleValue(
-				IMAGE_ORIGIN_BAND_X,
-				dTmp);
-		fPositionX = dTmp;
-		oImageMetaData.GetDoubleValue(
-				IMAGE_ORIGIN_BAND_Y,
-				dTmp);
-		fPositionY = dTmp;
-
-		oImageMetaData.GetDoubleValue(
-				IMAGE_ORIGIN_WIDTH,
-				dTmp);
-		fWidth = dTmp;
-		oImageMetaData.GetDoubleValue(
-				IMAGE_ORIGIN_HEIGHT,
-				dTmp);
-		fHeight = dTmp;
-
-		/*
-		//! Display Values
-		{
-			std::cerr << "fPositionX: " << fPositionX << std::endl;
-			std::cerr << "fPositionY: " << fPositionY << std::endl;
-			std::cerr << "fWidth: " << fWidth << std::endl;
-			std::cerr << "fHeight: " << fHeight << std::endl;
-		}
-		*/
-
-		//! Update PositionAttitudeTranform Node object 
-		if (0 == lSensorIndex || 1 == lSensorIndex)
-		{
-			poPAT->setPosition(
-					osg::Vec3f(
-						(fPositionX+fWidth/2.0f) / fRatio,
-						0.0f,
-						((fPositionY+fHeight/2.0f) / fRatio) - 50.0f));
-		}
-		else
-		{
-			poPAT->setPosition(
-					osg::Vec3f(
-						(fPositionX+fWidth/2.0f) / fRatio,
-						0.0f,
-						((fPositionY+fHeight/2.0f) / fRatio) + 50.0f));
-		}
-
-		//! Create Drawable object.
-		poDrawable = 
-			CreateImage(
-					fHeight / fRatio,
-					fWidth / fRatio);
-	}
+  osg::ref_ptr<osg::Drawable> drawablePtr;
+  drawablePtr = createImage(static_cast<float>(image.width()),
+                            static_cast<float>(image.height()));
 
 	//! Add StateSet to Drawable object
-	poDrawable->setStateSet(poStateSet.get());
+  drawablePtr->setStateSet(stateSetPtr.get());
 
 	//! Add Drawable object to Geode Object
-	poGeode->addDrawable(poDrawable.get());
+  geodePtr->addDrawable(drawablePtr.get());
 	
 	//! Add PAT Node to the Root node.
-	m_poRootNode->addChild(poPAT.get());
+  _rootNode->addChild(patPtr.get());
 	
 	//! Recompute Home to Center Object to Camera 
-	this->getCameraManipulator()->home(0.0f);
-	
+  getCameraManipulator()->home(0.0f);
 	return true;		
 }
 
-void C2DImageViewer::SetupWidget()
+void ImageViewer2D::_setupWidget()
 {
-	this->setObjectName("2D Image Viewer");
+  setObjectName("2D Image Viewer");
 	
 	// Trackball Manipulator
-	this->setCameraManipulator(new osgGA::TrackballManipulator);
+  setCameraManipulator(new osgGA::TrackballManipulator);
 	// Stats Event Handler s key
-	this->addEventHandler(new osgViewer::StatsHandler);
+  addEventHandler(new osgViewer::StatsHandler);
 	// State Event Handler w,l key
-	this->addEventHandler(
-			new osgGA::StateSetManipulator(
-				this->getCamera()->getOrCreateStateSet()));
+  addEventHandler(new osgGA::StateSetManipulator(getCamera()->getOrCreateStateSet()));
 
 	// Creating the Root node and add it the Geode object
-	m_poRootNode = new osg::Group;
+  _rootNode = new osg::Group;
 
 	// Select Root Node as The Scene.
-	this->setSceneData(m_poRootNode.get()); 
-	this->setMinimumSize(320,240);
-	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  setSceneData(_rootNode.get());
+  setMinimumSize(320,240);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
 }

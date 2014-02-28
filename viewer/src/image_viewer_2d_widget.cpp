@@ -1,4 +1,6 @@
-/// @file 2DImageViewerWidget.cpp
+//! @file
+
+#include <viewer/image_viewer_2d_widget.hpp>
 
 #include <QtGui/QFileDialog>
 #include <QtGui/QSpacerItem>
@@ -9,87 +11,54 @@
 #include <iostream>
 #include <sys/stat.h>
 
-#include "LogDefine.h"
-#include "DataGrabberGUI/ErrorMessage.hpp"
-#include "DataGrabberGUI/2DImageViewerWidget.hpp"
-
-using namespace DataGrabberGUI;
-
-C2DImageViewerWidget::C2DImageViewerWidget(QWidget *parent) :
-	QWidget(parent),
-	m_poLayout(0),
-	m_poLoadButton(0),
-	m_poCoordinatesCheckBox(0),
-	m_po2DImageViewer(0)
+namespace Viewer
 {
-#ifdef GUI_2DIMAGEVIEWERWIDGET_DEBUG
-	std::cerr << "GUI_DEBUG : Constructor C2DImageViewerWidget" << std::endl;
-#endif
-	SetupWidget();
+
+ImageViewer2DWidget::ImageViewer2DWidget(QWidget *parent) :
+  QWidget(parent),
+  _loadButton(0),
+  _imageViewer2D(0)
+{
+  _setupWidget();
 }
 
-C2DImageViewerWidget::~C2DImageViewerWidget()
+ImageViewer2DWidget::~ImageViewer2DWidget()
 {
-#ifdef GUI_2DIMAGEVIEWERWIDGET_DEBUG
-	std::cerr << "GUI_DEBUG : Destructor C2DImageViewerWidget" << std::endl;
-#endif
 }
 
-bool C2DImageViewerWidget::slotLoadImage(void)
+bool ImageViewer2DWidget::slotLoadImage(void)
 {
-	// Specify which Sequence File the user wants to load
-	QString strFileName = QFileDialog::getOpenFileName(
-			this,
-			"Open 2D Image File",
-			QDir(".").absolutePath(),
-			"Serialized Object (*.bin)");
+  QString fileName =
+      QFileDialog::getOpenFileName(
+        this, "Open Image File",	QDir(".").absolutePath(), 	"Serialized Object (*.bin)");
 
-	SharedData::Common::CImage2D* poImage2D;
-	struct stat oFileStat;
-	
-	if (stat(strFileName.toStdString().c_str(), &oFileStat) == 0)
-	{
-		std::ifstream oFile;
-		oFile.open(strFileName.toStdString().c_str());
-		
-		boost::archive::binary_iarchive ia(oFile, boost::archive::no_header);
-		ia >> poImage2D;
-		m_po2DImageViewer->slotSet2DImage(*poImage2D, m_poCoordinatesCheckBox->isChecked());
-		delete poImage2D;
+  QImage image(fileName);
+  _imageViewer2D->slotSet2DImage(image);
 
-		oFile.close();
-	}
-	
-	return true;
+  return true;
 }
 
-void C2DImageViewerWidget::SetupWidget()
+void ImageViewer2DWidget::_setupWidget()
 {
-    QSpacerItem *poSpacer;    
+  setObjectName("2D Image Viewer Widget");
+  setLayout(new QVBoxLayout(this));
 
-	this->setObjectName("2D Image Viewer Widget");
-	// Widget
-	m_poLayout = new QVBoxLayout(this);
-	this->setLayout(m_poLayout);
-	
-	m_poLoadButton = new QPushButton(this);
-	m_poLoadButton->setText("Load 2D Image");
-	m_poLoadButton->setFixedSize(m_poLoadButton->sizeHint());
-	m_poLayout->addWidget(m_poLoadButton);
+  _loadButton = new QPushButton(this);
+  _loadButton->setText("Load 2D Image");
+  _loadButton->setFixedSize(_loadButton->sizeHint());
+  layout()->addWidget(_loadButton);
 
-	poSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	m_poLayout->addItem(poSpacer);
+  _imageViewer2D = new Viewer::ImageViewer2D(this);
+  _imageViewer2D->setMinimumSize(320,240);
+  _imageViewer2D->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  layout()->addWidget(_imageViewer2D);
 
-    m_poCoordinatesCheckBox = new QCheckBox("Represent in geometric coordinates system", this);
-    m_poLayout->addWidget(m_poCoordinatesCheckBox);
+  layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-	m_po2DImageViewer = new DataGrabberGUI::C2DImageViewer(this);
-	m_po2DImageViewer->setMinimumSize(320,240);
-	m_po2DImageViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_poLayout->addWidget(m_po2DImageViewer);
+  QWidget::connect(
+        _loadButton,
+        SIGNAL(clicked()),
+        SLOT(slotLoadImage()));
+}
 
-	QWidget::connect(
-			m_poLoadButton,
-			SIGNAL(clicked()),
-			SLOT(slotLoadImage()));
 }

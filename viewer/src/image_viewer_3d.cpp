@@ -1,8 +1,7 @@
-/// @file
+//! @file
 
 #include <iostream>
 #include <sstream>
-#include "LogDefine.h"
 #include "DataGrabberGUI/ErrorMessage.hpp"
 #include "DataGrabberGUI/3DImageViewer.hpp"
 

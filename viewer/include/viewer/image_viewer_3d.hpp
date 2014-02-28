@@ -1,7 +1,7 @@
-/// @file
+//! @file
 
-#ifndef _3D_IMAGE_VIEWER_HPP
-#define _3D_IMAGE_VIEWER_HPP
+#ifndef IMAGE_VIEWER_3D_HPP
+#define IMAGE_VIEWER_3D_HPP
 
 #include <QtGui/QWidget>
 #include <QtGui/QVBoxLayout>
@@ -10,7 +10,7 @@
 #include "DataGrabberGUI/OSGHeaders.hpp"
 #include "DataGrabberGUI/AdapterWidget.hpp"
 
-namespace DataGrabberGUI
+namespace Viewer
 {
 	//! @class C3DImageViewer
 	class C3DImageViewer : public ViewerQT
@@ -43,7 +43,7 @@ namespace DataGrabberGUI
 		osg::ref_ptr<osg::Group> m_poRootNode;
 
 		void SetupWidget();			
-	};
-} // DataGrabberGUI
+  };
 
-#endif // end of include guard: 3D_IMAGE_VIEWER_HPP
+}
+#endif

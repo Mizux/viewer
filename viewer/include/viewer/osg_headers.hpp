@@ -20,9 +20,6 @@
 #include <osg/Point>
 #include <osg/PointSprite>
 #include <osg/PositionAttitudeTransform>
-#include "ImageGeometry.hpp"
-#include "PointCloudGeometry.hpp"
-#include "osgUtil/DelaunayTriangulator"
 // OSG DB (files I/O)
 #include <osgDB/Registry>
 #include <osgDB/ReadFile>
@@ -35,6 +32,8 @@
 #include <osgGA/GUIEventHandler>
 #include <osgGA/StateSetManipulator>
 #include <osgGA/TrackballManipulator>
+
+#include "image_geometry.hpp"
 
 //! @brief Get Color Bar for normalized values (from 0.0 to 1.0)
 inline bool GetColor(const float p_fValue, float *p_pfRed, float *p_pfGreen, float *p_pfBlue)

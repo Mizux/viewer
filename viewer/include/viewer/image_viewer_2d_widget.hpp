@@ -1,47 +1,45 @@
-/// @file 2DImageViewerWidget.hpp
+//! @file 2DImageViewerWidget.hpp
 
-#ifndef _2D_IMAGE_VIEWER_WIDGET_HPP
-#define _2D_IMAGE_VIEWER_WIDGET_HPP
+#ifndef IMAGE_VIEWER_2D_WIDGET_HPP
+#define IMAGE_VIEWER_2D_WIDGET_HPP
 
 #include <QtGui/QWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
 #include <QtGui/QCheckBox>
 
-#include "DataGrabberGUI/2DImageViewer.hpp"
-#include "DataGrabberGUI/OSGHeaders.hpp"
-#include "DataGrabberGUI/AdapterWidget.hpp"
+#include "image_viewer_2d.hpp"
+#include "osg_headers.hpp"
+#include "adapter_widget.hpp"
 
-namespace DataGrabberGUI
+namespace Viewer
 {
-	//! @class C2DImageViewerWidget
-	class C2DImageViewerWidget : public QWidget
-	{
-		Q_OBJECT
 
-			C2DImageViewerWidget(const C2DImageViewerWidget&);
-		// intentionally undefined
-		C2DImageViewerWidget& operator=(const C2DImageViewerWidget&);
+//! @class C2DImageViewerWidget
+class ImageViewer2DWidget : public QWidget
+{
+    Q_OBJECT
 
-		public:
-			//! @brief Constructor.
-			C2DImageViewerWidget(QWidget *parent = 0);
-	
-			//! @brief Destructor.
-			virtual ~C2DImageViewerWidget();
+    ImageViewer2DWidget(const ImageViewer2DWidget&);
+    // intentionally undefined
+    ImageViewer2DWidget& operator=(const ImageViewer2DWidget&);
 
-			public slots:
-			bool slotLoadImage(void);
+  public:
+    //! @brief Constructor.
+    ImageViewer2DWidget(QWidget *parent = 0);
 
-	private:
-		QVBoxLayout *m_poLayout;
+    //! @brief Destructor.
+    virtual ~ImageViewer2DWidget();
 
-		QPushButton *m_poLoadButton;
-        QCheckBox *m_poCoordinatesCheckBox;
-		DataGrabberGUI::C2DImageViewer *m_po2DImageViewer;
+  public slots:
+    bool slotLoadImage(void);
 
-		void SetupWidget();			
-	};
-} // DataGrabberGUI
+  private:
+    QPushButton *_loadButton;
+    Viewer::ImageViewer2D *_imageViewer2D;
 
-#endif // end of include guard: 2D_IMAGE_VIEWER_HPP
+    void _setupWidget();
+};
+
+}
+#endif

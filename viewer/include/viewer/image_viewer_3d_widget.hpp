@@ -11,7 +11,7 @@
 #include "DataGrabberGUI/OSGHeaders.hpp"
 #include "DataGrabberGUI/AdapterWidget.hpp"
 
-namespace DataGrabberGUI
+namespace Viewer
 {
 	//! @class C3DImageViewerWidget
 	class C3DImageViewerWidget : public QWidget
@@ -36,7 +36,7 @@ namespace DataGrabberGUI
 		QVBoxLayout *m_poLayout;
 
 		QPushButton *m_poLoadButton;
-		DataGrabberGUI::C3DImageViewer *m_po3DImageViewer;
+		Viewer::C3DImageViewer *m_po3DImageViewer;
 
 		void SetupWidget();			
 	};

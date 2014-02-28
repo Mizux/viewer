@@ -7,7 +7,7 @@
 
 #include "OSGHeaders.hpp"
 
-namespace DataGrabberGUI 
+namespace Viewer 
 {
   /// @brief Create Point Cloud Polygon with Z Map Texture.
   /// @param[in] p_pfX Float Array for X coordinate. 

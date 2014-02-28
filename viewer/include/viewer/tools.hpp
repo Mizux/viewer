@@ -1,51 +1,47 @@
 //! @file
-//! @brief Main Window Widget for the ViT Tools Application
-//! Header File.
+//! @brief Main Window Widget
 
-#ifndef TOOLS_GUI_HPP
-#define TOOLS_GUI_HPP
+#ifndef VIEWER_TOOLS_GUI_HPP
+#define VIEWER_TOOLS_GUI_HPP
 
 #include <QtGui/QTabWidget>
 #include <QtGui/QVBoxLayout>
 #include <QShortcut>
 
-#include "2DImageViewerWidget.hpp"
-#include "3DImageViewerWidget.hpp"
+#include "image_viewer_2d_widget.hpp"
+#include "image_viewer_3d_widget.hpp"
 
-#include "QuitWidget.hpp"
-
-namespace DataGrabberGUI
+namespace Viewer
 {
-  /// @class CToolsGUI.
-  /// @brief Main Window Widget 
-  class CToolsGUI : public QWidget
-	{
-	  Q_OBJECT
 
-	  // intentionally undefined
-    CToolsGUI(const CToolsGUI&);
-	  // intentionally undefined
-	  CToolsGUI& operator =(const CToolsGUI&);
+/// @class CToolsGUI.
+/// @brief Main Window Widget
+class ToolsGUI : public QWidget
+{
+    Q_OBJECT
 
-    public :
+    // intentionally undefined
+    ToolsGUI(const ToolsGUI&);
+    // intentionally undefined
+    ToolsGUI& operator =(const ToolsGUI&);
 
+  public:
     /// @brief Constructor.
-    CToolsGUI(QWidget *parent = 0);
+    ToolsGUI(QWidget *parent = 0);
 
-    /// @brief Destructor. 
-    virtual ~CToolsGUI();
+    /// @brief Destructor.
+    virtual ~ToolsGUI();
 
-    private:
-		QShortcut *m_qsExitShortcut;
-		QVBoxLayout *m_poLayout;
+  private:
+    QShortcut *m_qsExitShortcut;
+    QVBoxLayout *m_poLayout;
 
-		QTabWidget *m_poTabWidget;
-		DataGrabberGUI::C2DImageViewerWidget *m_po2DImageViewerWidget;
-		DataGrabberGUI::C3DImageViewerWidget *m_po3DImageViewerWidget;
+    QTabWidget *m_poTabWidget;
+    Viewer::ImageViewer2DWidget *m_po2DImageViewerWidget;
+    Viewer::C3DImageViewerWidget *m_po3DImageViewerWidget;
 
-		DataGrabberGUI::CQuitWidget *m_poQuitWidget;
-    
-		void SetupGUI();
-  };
+    void SetupGUI();
+};
+
 }
 #endif
