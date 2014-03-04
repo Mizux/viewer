@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.0)
 project(Viewer)
 
 # Set this on if you need verbose output from CMake
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 ################################
 ######  Compilation Flags ######

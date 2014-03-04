@@ -33,7 +33,7 @@ void ToolsGUI::SetupGUI()
   m_po2DImageViewerWidget = new ImageViewer2DWidget(this);
 	m_poTabWidget->addTab(m_po2DImageViewerWidget, "2D Viewer");
 
-	m_po3DImageViewerWidget = new C3DImageViewerWidget(this);
+	m_po3DImageViewerWidget = new ImageViewer3DWidget(this);
 	m_poTabWidget->addTab(m_po3DImageViewerWidget, "3D Viewer");
 
   m_qsExitShortcut = new QShortcut(Qt::CTRL + Qt::Key_Q, this, SLOT(slotQuit()));

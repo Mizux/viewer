@@ -1,10 +1,9 @@
 //! @file
-//! @brief Create an Image Geometry Node.
 
 #ifndef IMAGE_GEOMETRY_HPP
 #define IMAGE_GEOMETRY_HPP
 
-#include "osg_headers.hpp"
+#include "type.hpp"
 
 namespace Viewer
 {
@@ -13,6 +12,7 @@ namespace Viewer
   /// @param[in] width Width of Image.
   /// @param[in] height Height of Image.
   /// @return A Drawable (Geometry) node for OpenSceneGraph.
-  osg::ref_ptr<osg::Drawable> createImage(float width, float height);
+  DrawablePtr createDrawable(float width, float height);
 }
+
 #endif

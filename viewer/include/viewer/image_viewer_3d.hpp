@@ -3,46 +3,38 @@
 #ifndef IMAGE_VIEWER_3D_HPP
 #define IMAGE_VIEWER_3D_HPP
 
-#include <QtGui/QWidget>
-#include <QtGui/QVBoxLayout>
-#include <Marshallable/Common/Image3D.h>
-
-#include "DataGrabberGUI/OSGHeaders.hpp"
-#include "DataGrabberGUI/AdapterWidget.hpp"
+#include "adapter_widget.hpp"
+#include "type.hpp"
 
 namespace Viewer
 {
 	//! @class C3DImageViewer
-	class C3DImageViewer : public ViewerQT
+  class ImageViewer3D : public ViewerQT
 	{
 		Q_OBJECT
 
-			C3DImageViewer(const C3DImageViewer&);
+      ImageViewer3D(const ImageViewer3D&);
 		// intentionally undefined
-		C3DImageViewer& operator=(const C3DImageViewer&);
+    ImageViewer3D& operator=(const ImageViewer3D&);
 
 	public:
 		//! @brief Constructor.
-		C3DImageViewer(QWidget *parent = 0);
+    ImageViewer3D(QWidget *parent = 0);
 
 		//! @brief Destructor.
-		virtual ~C3DImageViewer();
+    virtual ~ImageViewer3D();
 
 		public slots:
-			bool slotSet3DImage(
-					const SharedData::Common::CImage3D& p_o3DImage);
+      bool slotSet3DImage(const DrawablePtr& image);
 
-		bool slotSet3DImages(
-				const std::vector<SharedData::Common::CImage3D *>& p_arpo3DImages);
+    bool slotSet3DImages(	const DrawablePtrArray& images);
 
 	private:
-		bool addImage(
-				const SharedData::Common::CImage3D& p_o3DImage);
+    bool addImage(const DrawablePtr& image);
 
-		// Viewer OSG
-		osg::ref_ptr<osg::Group> m_poRootNode;
+    void _setupWidget();
 
-		void SetupWidget();			
+    osg::ref_ptr<osg::Group> _rootNode;
   };
 
 }

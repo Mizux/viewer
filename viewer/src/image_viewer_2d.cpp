@@ -18,25 +18,19 @@ ImageViewer2D::~ImageViewer2D()
 
 bool ImageViewer2D::slotSet2DImage(const QImage& image)
 {
-	//! Remove old Images Node if exist from Root Node.
   _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
-	//! Build and Add New Image to Scene
-  _addImage(image);
-
-	return true;
+  return _addImage(image);
 }
 
 bool ImageViewer2D::slotSet2DImages(const QVector<QImage>& images)
 {
-	//! Remove old Images Node if exist from Root Node.
   _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
-  //! Build and Add New Images to Scene
   bool result = true;
-  for (int i=0; i < images.size(); ++i)
+  foreach (const QVector<QImage>::value_type& it, images)
 	{
-    if (!_addImage(images[i]))
+    if (!_addImage(it))
       result = false;
 	}
 
@@ -148,7 +142,7 @@ bool ImageViewer2D::_addImage(const QImage& image)
 
 	//! Create New image and add it to the Root Node.
   osg::ref_ptr<osg::Drawable> drawablePtr;
-  drawablePtr = createImage(static_cast<float>(image.width()),
+  drawablePtr = createDrawable(static_cast<float>(image.width()),
                             static_cast<float>(image.height()));
 
 	//! Add StateSet to Drawable object

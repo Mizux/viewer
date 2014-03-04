@@ -1,107 +1,57 @@
-/// @file 3DImageViewerWidget.cpp
+//! @file
+
+#include <viewer/image_viewer_3d_widget.hpp>
 
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <fstream>
-#include <iostream>
-#include <sys/stat.h>
+#include <osgDB/ReadFile>
 
-#include "LogDefine.h"
-#include "DataGrabberGUI/ErrorMessage.hpp"
-#include "DataGrabberGUI/3DImageViewerWidget.hpp"
-
-using namespace DataGrabberGUI;
-
-C3DImageViewerWidget::C3DImageViewerWidget(QWidget *parent) :
-	QWidget(parent),
-	m_poLayout(0),
-	m_poLoadButton(0),
-	m_po3DImageViewer(0)
+namespace Viewer
 {
-#ifdef GUI_3DIMAGEVIEWERWIDGET_DEBUG
-	std::cerr << "GUI_DEBUG : Constructor C3DImageViewerWidget" << std::endl;
-#endif
-	SetupWidget();
+
+ImageViewer3DWidget::ImageViewer3DWidget(QWidget *parent) :
+  QWidget(parent),
+  _loadButton(0),
+  _imageViewer3D(0)
+{
+  _setupWidget();
 }
 
-C3DImageViewerWidget::~C3DImageViewerWidget()
+ImageViewer3DWidget::~ImageViewer3DWidget()
 {
-#ifdef GUI_3DIMAGEVIEWERWIDGET_DEBUG
-	std::cerr << "GUI_DEBUG : Destructor C3DImageViewerWidget" << std::endl;
-#endif
 }
 
-bool C3DImageViewerWidget::slotLoadImage(void)
+bool ImageViewer3DWidget::slotLoadImage(void)
 {
-	// Specify which Sequence File the user wants to load
-	QString strFileName = QFileDialog::getOpenFileName(
-			this,
-			"Open 3D Image File",
-			QDir(".").absolutePath(),
-			"Serialized Object (*.bin)");
+  QString fileName =
+      QFileDialog::getOpenFileName(this, "Open Node File", QDir(".").absolutePath());
 
-	SharedData::Common::CImage3D* poImage3DPtr;
-	SharedData::Common::CImage3D poImage3DObj;
-	struct stat oFileStat;
-	
-	if (stat(strFileName.toStdString().c_str(), &oFileStat) == 0)
-	{
-		try
-		{
-			std::ifstream oFile;
-			oFile.open(strFileName.toStdString().c_str());
-			boost::archive::binary_iarchive ia(oFile, boost::archive::no_header);
-			ia >> poImage3DPtr;
-			m_po3DImageViewer->slotSet3DImage(*poImage3DPtr);
-			delete poImage3DPtr;
-			oFile.close();
-		}
-		catch(...)
-		{
-			try
-			{
-				std::ifstream oFile;
-				oFile.open(strFileName.toStdString().c_str());
-				boost::archive::binary_iarchive ia(oFile, boost::archive::no_header);
-				ia >> poImage3DObj;
-				m_po3DImageViewer->slotSet3DImage(poImage3DObj);
-				oFile.close();
-			}
-			catch(...)
-			{
-				QMessageBox oMsgBox;
-				oMsgBox.setText("Error: file does not contains a CImage3D");
-				oMsgBox.exec();
+  osg::Node * tmp = osgDB::readNodeFile(fileName.toStdString());
+  //! @bug not working...
+  //_imageViewer3D->slotSet3DImage(tmp);
 
-				return false;
-			}
-		}
-	}
-	
-	return true;
+  return true;
 }
 
-void C3DImageViewerWidget::SetupWidget()
+void ImageViewer3DWidget::_setupWidget()
 {
-	this->setObjectName("3D Image Viewer Widget");
-	// Widget
-	m_poLayout = new QVBoxLayout(this);
-	this->setLayout(m_poLayout);
-	
-	m_poLoadButton = new QPushButton(this);
-	m_poLoadButton->setText("Load 3D Image");
-	m_poLoadButton->setFixedSize(m_poLoadButton->sizeHint());
-	m_poLayout->addWidget(m_poLoadButton);
+  setObjectName("3D Image Viewer Widget");
+  setLayout(new QVBoxLayout(this));
 
-	m_po3DImageViewer = new DataGrabberGUI::C3DImageViewer(this);
-	m_po3DImageViewer->setMinimumSize(320,240);
-	m_po3DImageViewer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_poLayout->addWidget(m_po3DImageViewer);
+  _loadButton = new QPushButton(this);
+  _loadButton->setText("Load 3D Image");
+  _loadButton->setFixedSize(_loadButton->sizeHint());
+  layout()->addWidget(_loadButton);
 
-	QWidget::connect(
-			m_poLoadButton,
-			SIGNAL(clicked()),
-			SLOT(slotLoadImage()));
+  _imageViewer3D = new ImageViewer3D(this);
+  _imageViewer3D->setMinimumSize(320,240);
+  _imageViewer3D->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  layout()->addWidget(_imageViewer3D);
+
+  QWidget::connect(
+        _loadButton,
+        SIGNAL(clicked()),
+        SLOT(slotLoadImage()));
+}
+
 }

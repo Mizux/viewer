@@ -7,38 +7,34 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
 
-#include "DataGrabberGUI/3DImageViewer.hpp"
-#include "DataGrabberGUI/OSGHeaders.hpp"
-#include "DataGrabberGUI/AdapterWidget.hpp"
+#include "image_viewer_3d.hpp"
 
 namespace Viewer
 {
 	//! @class C3DImageViewerWidget
-	class C3DImageViewerWidget : public QWidget
+  class ImageViewer3DWidget : public QWidget
 	{
 		Q_OBJECT
 
-			C3DImageViewerWidget(const C3DImageViewerWidget&);
+      ImageViewer3DWidget(const ImageViewer3DWidget&);
 		// intentionally undefined
-		C3DImageViewerWidget& operator=(const C3DImageViewerWidget&);
+    ImageViewer3DWidget& operator=(const ImageViewer3DWidget&);
 
 		public:
 			//! @brief Constructor.
-			C3DImageViewerWidget(QWidget *parent = 0);
+      ImageViewer3DWidget(QWidget *parent = 0);
 	
 			//! @brief Destructor.
-			virtual ~C3DImageViewerWidget();
+      virtual ~ImageViewer3DWidget();
 
 			public slots:
 			bool slotLoadImage(void);
 
 	private:
-		QVBoxLayout *m_poLayout;
+    QPushButton *_loadButton;
+    Viewer::ImageViewer3D *_imageViewer3D;
 
-		QPushButton *m_poLoadButton;
-		Viewer::C3DImageViewer *m_po3DImageViewer;
-
-		void SetupWidget();			
+    void _setupWidget();
 	};
 } // DataGrabberGUI
 

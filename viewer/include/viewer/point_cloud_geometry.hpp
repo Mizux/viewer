@@ -1,11 +1,9 @@
 /// @file
-/// @brief Create an Point Cloud Geometry Node.
-/// Header File.
 
 #ifndef POINT_CLOUD_GEOMETRY_HPP
 #define POINT_CLOUD_GEOMETRY_HPP
 
-#include "OSGHeaders.hpp"
+#include "type.hpp"
 
 namespace Viewer 
 {
@@ -16,8 +14,7 @@ namespace Viewer
 	/// @param[in] p_uiImageWidth Width of Camera.
 	/// @param[in] p_uiImageHeight Height of Camera.
   /// @return A Drawable (Geometry) node for OpenSceneGraph.
-  osg::ref_ptr<osg::Drawable>
-    CreatePointCloud(
+  DrawablePtr createPointCloud(
 				const float *p_pfX,
 				const float *p_pfY,
 				const float *p_pfZ,
@@ -34,8 +31,7 @@ namespace Viewer
 	/// @param[in] p_uiImageWidth Width of Camera.
 	/// @param[in] p_uiImageHeight Height of Camera.
   /// @return A Drawable (Geometry) node for OpenSceneGraph.
-  osg::ref_ptr<osg::Drawable>
-    CreateTexturedPointCloud(
+  DrawablePtr CreateTexturedPointCloud(
 				const float *p_pfX,
 				const float *p_pfY,
 				const float *p_pfZ,

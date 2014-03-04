@@ -29,8 +29,7 @@ ImageViewer2DWidget::~ImageViewer2DWidget()
 bool ImageViewer2DWidget::slotLoadImage(void)
 {
   QString fileName =
-      QFileDialog::getOpenFileName(
-        this, "Open Image File",	QDir(".").absolutePath(), 	"Serialized Object (*.bin)");
+      QFileDialog::getOpenFileName( this, "Open Image File", QDir(".").absolutePath());
 
   QImage image(fileName);
   _imageViewer2D->slotSet2DImage(image);

@@ -1,143 +1,91 @@
 //! @file
 
-#include <iostream>
-#include <sstream>
-#include "DataGrabberGUI/ErrorMessage.hpp"
-#include "DataGrabberGUI/3DImageViewer.hpp"
+#include <viewer/image_viewer_3d.hpp>
 
-using namespace DataGrabberGUI;
+#include <osg/Point>
+#include <osgGA/StateSetManipulator>
+#include <osgGA/TrackballManipulator>
+#include <osgViewer/ViewerEventHandlers>
 
-C3DImageViewer::C3DImageViewer(QWidget *parent) :
+namespace Viewer
+{
+
+ImageViewer3D::ImageViewer3D(QWidget *parent) :
 	ViewerQT(parent),
-	m_poRootNode(0)
+  _rootNode(0)
 {
-#ifdef GUI_3DIMAGEVIEWER_DEBUG
-	std::cerr << "GUI_DEBUG : Constructor C3DImageViewer" << std::endl;
-#endif
-	SetupWidget();
+  _setupWidget();
 }
 
-C3DImageViewer::~C3DImageViewer()
+ImageViewer3D::~ImageViewer3D()
 {
-#ifdef GUI_3DIMAGEVIEWER_DEBUG
-	std::cerr << "GUI_DEBUG : Destructor C3DImageViewer" << std::endl;
-#endif
 }
 
-bool C3DImageViewer::slotSet3DImage(
-		const SharedData::Common::CImage3D& p_o3DImage)
+bool ImageViewer3D::slotSet3DImage(const DrawablePtr& image)
 {
-	//! Remove old Images Node if exist from Root Node.
-	m_poRootNode->removeChildren(0, m_poRootNode->getNumChildren()) ;
+  _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
-	//! Build and Add New Image to Scene
-	addImage(p_o3DImage);
-
-	return true;
+  return addImage(image);
 }
 
-bool C3DImageViewer::slotSet3DImages(
-		const std::vector<SharedData::Common::CImage3D *>& p_arpo3DImages)
+bool ImageViewer3D::slotSet3DImages(const DrawablePtrArray& images)
 {
-	//! Remove old Images Node if exist from Root Node.
-	m_poRootNode->removeChildren(0, m_poRootNode->getNumChildren()) ;
+  _rootNode->removeChildren(0, _rootNode->getNumChildren()) ;
 
-	//! Build and Add New Images to Scene
-	for (unsigned int uiLoop =0; uiLoop < p_arpo3DImages.size(); uiLoop++)
-	{
-		addImage(*(p_arpo3DImages[uiLoop]));
-	}
+  bool result = true;
+  foreach (const DrawablePtrArray::value_type& it, images)
+  {
+    if (!addImage(it))
+      result = false;
+  }
 
-	return true;
+  return result;
 }
 
-bool C3DImageViewer::addImage(const SharedData::Common::CImage3D& p_o3DImage)
+bool ImageViewer3D::addImage(const DrawablePtr& image)
 {
-	using namespace SharedData::Common;
-
-	//! Create Point attribute.
-	osg::ref_ptr<osg::Point> poPoint = new osg::Point();
-	poPoint->setSize(1.0f);
-
 	//! Create StateSet and add it the Point object.
-	osg::ref_ptr<osg::StateSet> poStateSet = new osg::StateSet;
+  osg::ref_ptr<osg::StateSet> stateSetPtr = new osg::StateSet;
 	{
 		//! Add Point Attribute.
-		poStateSet->setAttribute(poPoint.get());
+    osg::ref_ptr<osg::Point> point = new osg::Point();
+    point->setSize(1.0f);
+    stateSetPtr->setAttribute(point.get());
 		//! Activate The Depth Test.
-		poStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    stateSetPtr->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 		//! Active Culling to not see the "back" of the texture.
-		poStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+    stateSetPtr->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 		//! Desactivate Lightning (we want to see the image color value!).
-		poStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    stateSetPtr->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	}
 	
-	//! Get Image Property
-	int iWidth = p_o3DImage.GetCols();
-	int iHeight = p_o3DImage.GetRows();
-
-	//! Create Drawable object and add it the StateSet object.
-	osg::ref_ptr<osg::Drawable> poDrawable; 
-	{
-
-		SharedData::Common::CTextureRGB oTexture;
-		if (!p_o3DImage.GetTexture(oTexture))
-		{
-			poDrawable = 
-				CreatePointCloud(
-						&(p_o3DImage.GetX()[0]),
-						&(p_o3DImage.GetY()[0]),
-						&(p_o3DImage.GetZ()[0]),
-						iWidth,
-						iHeight);
-		}
-		else
-		{
-			poDrawable = 
-				CreateTexturedPointCloud(
-						&(p_o3DImage.GetX()[0]),
-						&(p_o3DImage.GetY()[0]),
-						&(p_o3DImage.GetZ()[0]),
-						&(oTexture.GetRed()[0]),
-						&(oTexture.GetGreen()[0]),
-						&(oTexture.GetBlue()[0]),
-						iWidth,
-						iHeight);
-		}
-		poDrawable->setStateSet(poStateSet.get());
-	}
-
 	//! Create Geode Object and add it the Drawable object.
-	osg::ref_ptr<osg::Geode> poGeode = new osg::Geode;
-	poGeode->addDrawable(poDrawable.get());
-
-	//! Add Geode Node to the Root node.
-	m_poRootNode->addChild(poGeode.get());
-
+  osg::ref_ptr<osg::Geode> geodePtr = new osg::Geode;
+  geodePtr->setStateSet(stateSetPtr);
+  geodePtr->addDrawable(image.get());
+  _rootNode->addChild(geodePtr.get());
 	//! Recompute Home to Center Object to Camera 
-	this->getCameraManipulator()->home(0.0f);
+  getCameraManipulator()->home(0.0f);
 
 	return true;
 }
 
-void C3DImageViewer::SetupWidget()
+void ImageViewer3D::_setupWidget()
 {
-	this->setObjectName("3D Image Viewer");
+  setObjectName("3D Image Viewer");
+  setMinimumSize(320,240);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	// Trackball Manipulator
-	this->setCameraManipulator(new osgGA::TrackballManipulator);
-	// Stats Event Handler s key
-	this->addEventHandler(new osgViewer::StatsHandler);
+  setCameraManipulator(new osgGA::TrackballManipulator);
+  // Stats Event Handler s key
+  addEventHandler(new osgViewer::StatsHandler);
 	// State Event Handler w,l key
-	this->addEventHandler(
-			new osgGA::StateSetManipulator(
-				this->getCamera()->getOrCreateStateSet()));
+  addEventHandler(new osgGA::StateSetManipulator(getCamera()->getOrCreateStateSet()));
 
 	// Creating the Root node and add it the Geode object
-	m_poRootNode = new osg::Group;
+  _rootNode = new osg::Group;
+  setSceneData(_rootNode.get());
+}
 
-	// Select Root Node as The Scene.
-	this->setSceneData(m_poRootNode.get()); 
-	this->setMinimumSize(320,240);
-	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }

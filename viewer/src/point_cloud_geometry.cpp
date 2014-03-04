@@ -1,21 +1,22 @@
 /// @file
-/// @brief Create an PointCloud Geometry Node.
 
-#include <iostream>
-#include <algorithm>
-#include "DataGrabberGUI/PointCloudGeometry.hpp"
+#include <viewer/point_cloud_geometry.hpp>
+#include <viewer/tools.hpp>
+
+#include <osg/Geometry>
+#include <osgUtil/DelaunayTriangulator>
 
 #define RANGE_MAX 1.0f
 #define RANGE_MIN -1.0f
 #define MAX_POINT 150000
 
-using namespace DataGrabberGUI;
+namespace Viewer
+{
 
-osg::ref_ptr<osg::Drawable> 
-DataGrabberGUI::CreatePointCloud(	
-		const float *p_pfX,
-		const float *p_pfY,
-		const float *p_pfZ,
+DrawablePtr createPointCloud(
+    const float *pX,
+    const float *pY,
+    const float *pZ,
 		unsigned int p_uiImageWidth,
 		unsigned int p_uiImageHeight)
 {
@@ -32,13 +33,11 @@ DataGrabberGUI::CreatePointCloud(
 	unsigned int uiCount=0;
 	unsigned int uiLoop;
 
-	std::cerr << "OSG: Total Point Number: " << p_uiImageWidth*p_uiImageHeight << std::endl;
 	int iStride=1;
 	while (p_uiImageWidth*p_uiImageHeight/iStride/iStride > MAX_POINT)
 	{
 		iStride++;
 	}
-	std::cerr << "OSG: Stride: " << iStride << std::endl;
 
 	unsigned int uiXmin = p_uiImageWidth/2 - p_uiImageWidth/iStride/2;
 	unsigned int uiXmax = p_uiImageWidth/2 + p_uiImageWidth/iStride/2;
@@ -51,35 +50,20 @@ DataGrabberGUI::CreatePointCloud(
 		{
 			uiLoop = uiY*p_uiImageWidth + uiX;
 			
-			if (isnormal(p_pfX[uiLoop]) == 0 ||
-					isnormal(p_pfY[uiLoop]) == 0 ||
-					isnormal(p_pfZ[uiLoop]) == 0)
+      if (isnormal(pX[uiLoop]) == 0 ||
+          isnormal(pY[uiLoop]) == 0 ||
+          isnormal(pZ[uiLoop]) == 0)
 				continue;
 
-			if (0.0f != p_pfX[uiLoop] && 0.0f != p_pfY[uiLoop] && RANGE_MIN <= p_pfZ[uiLoop] && RANGE_MAX >= p_pfZ[uiLoop])
+      if (0.0f != pX[uiLoop] && 0.0f != pY[uiLoop] && RANGE_MIN <= pZ[uiLoop] && RANGE_MAX >= pZ[uiLoop])
 			{
 				uiCount++;
-				paroVertices->push_back(osg::Vec3f(p_pfX[uiLoop], p_pfY[uiLoop], p_pfZ[uiLoop]));
+        paroVertices->push_back(osg::Vec3f(pX[uiLoop], pY[uiLoop], pZ[uiLoop]));
 				paroNormals->push_back(osg::Vec3f(0.0f, 0.0f, 1.0f));
 				paroColors->push_back(osg::Vec4f(1.0f,	1.0f,	1.0f,	1.0f));
 			}
 		}
 	}
-
-	// Debug
-	/*
-	if(paroVertices->size() >= 8)
-	{
-		for (unsigned int uiLoop =0; uiLoop < 8; uiLoop++)
-		{
-			std::cerr <<
-				"[" << (*paroVertices)[uiLoop][0] <<
-				"," << (*paroVertices)[uiLoop][1] <<
-				"," << (*paroVertices)[uiLoop][2] <<
-				"]" << std::endl;
-		}
-	}
-	*/
 
 	//! <LI>Attach Vertices Array to Geometric Node.
 	poGeometry->setVertexArray(paroVertices.get());
@@ -89,16 +73,12 @@ DataGrabberGUI::CreatePointCloud(
 	
 	//! <LI>Compute Delaunay Triangulation
 	{
-		std::cerr << "OSG: Epipolar Point Count Before Delaunay : " << uiCount << std::endl;
-
 		osg::ref_ptr<osgUtil::DelaunayTriangulator> poTriangulator = new osgUtil::DelaunayTriangulator(
 				static_cast<osg::Vec3Array*>(poGeometry->getVertexArray()),
 				static_cast<osg::Vec3Array*>(poGeometry->getNormalArray()));
 		poTriangulator->triangulate();
 		//! <LI>Attach Triangle List to Geometric Node.
 		poGeometry->addPrimitiveSet(poTriangulator->getTriangles());
-
-		std::cerr << "OSG: Epipolar Point Count After Delaunay : " << paroVertices->size() << std::endl;
 	}
 
 	//! <LI>Correct Normal Vector to have all Vector Normal Z coordinate positif
@@ -115,7 +95,7 @@ DataGrabberGUI::CreatePointCloud(
 		float fMax = 0.5f;
 		for(unsigned int uiLoop=0; uiLoop < paroVertices->size(); uiLoop++)
 		{
-			GetColor(
+      toColor(
 					((*paroVertices)[uiLoop][2]-fMin)/(fMax-fMin),
 					&((*paroColors)[uiLoop][0]),
 					&((*paroColors)[uiLoop][1]),
@@ -155,8 +135,7 @@ struct CPlop
 	}
 } myPlop;
 
-osg::ref_ptr<osg::Drawable> 
-DataGrabberGUI::CreateTexturedPointCloud(	
+DrawablePtr CreateTexturedPointCloud(
 		const float *p_pfX,
 		const float *p_pfY,
 		const float *p_pfZ,
@@ -184,12 +163,6 @@ DataGrabberGUI::CreateTexturedPointCloud(
 	std::cerr << "OSG: Total Point Number: " << p_uiImageWidth*p_uiImageHeight << std::endl;
 	
 	int iStride=1;
-#ifdef DEBUG_3D_VIEWER
-	unsigned int uiXmin = p_uiImageWidth/2 - p_uiImageWidth/iStride/2;
-	unsigned int uiXmax = p_uiImageWidth/2 + p_uiImageWidth/iStride/2;
-	unsigned int uiYmin = p_uiImageHeight/2 - p_uiImageHeight/iStride/2;
-	unsigned int uiYmax = p_uiImageHeight/2 + p_uiImageHeight/iStride/2;
-#else
 	unsigned int uiXmin = 0; 
 	unsigned int uiXmax = p_uiImageWidth;
 	unsigned int uiYmin = 0;
@@ -199,7 +172,6 @@ DataGrabberGUI::CreateTexturedPointCloud(
 	{
 		iStride++;
 	}
-#endif
 	std::cerr << "OSG: Stride: " << iStride << std::endl;
 	
 	for(unsigned int uiY=uiYmin; uiY < uiYmax; uiY+=iStride)
@@ -290,4 +262,6 @@ DataGrabberGUI::CreateTexturedPointCloud(
 
 	//! </OL>
 	return poGeometry;
+}
+
 }
