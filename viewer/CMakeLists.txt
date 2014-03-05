@@ -15,9 +15,6 @@ add_definitions(${QT_DEFINITIONS})
 find_package(OpenSceneGraph 2.8 REQUIRED COMPONENTS osg osgViewer)
 include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-include_directories("include")
-set(${PROJECT_NAME}_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE PATH "${PROJECT_NAME} include path")
-
 # The file list for this project
 set(_HDRS
   include/viewer/type.hpp
