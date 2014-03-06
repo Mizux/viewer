@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Viewer)
+project(viewer)
 
 set(BOOST_ROOT /home/clemolgat/.local/share/qi/toolchains/master-linux64/boost)
 find_package(Boost REQUIRED)
@@ -40,10 +40,16 @@ set(_SRCS
   src/point_cloud_geometry.cpp
   src/tools.cpp
 	)
-
 add_library(${PROJECT_NAME} SHARED ${_HDRS} ${_SRCS} ${_MOC_SRCS})
 target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${QT_LIBRARIES}
   ${OPENSCENEGRAPH_LIBRARIES})
-install(TARGETS ${PROJECT_NAME} DESTINATION .)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${_HDRS}")
+install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
+  RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
+  LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
+  PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}" COMPONENT dev)

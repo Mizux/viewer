@@ -42,41 +42,36 @@ endif()
 
 ##################   INSTALL PARAMETERS    ################
 # Offer the user the choice of overriding the installation directories
+set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
 set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
-set(INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME} CACHE PATH "Installation directory for CMake files")
+set(INSTALL_CMAKE_DIR cmake CACHE PATH "Installation directory for CMake files")
+# Make relative paths absolute (needed later on)
+foreach(p LIB BIN INCLUDE CMAKE)
+  set(var INSTALL_${p}_DIR)
+  if(NOT IS_ABSOLUTE "${${var}}")
+    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+  endif()
+endforeach()
 
-# Default include directories
-include_directories("${PROJECT_SOURCE_DIR}/include")
+############# SUB PROJECTS ###################
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/sdk/lib CACHE PATH "Build directory for archive")
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/sdk/lib CACHE PATH "Build directory for libraries")
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/sdk/bin CACHE PATH "Build directory for executables")
 
-set(PROJECT_LIST viewer viewer_app)
-foreach(arg ${PROJECT_LIST})
+set(SUB_PROJECTS viewer viewer_app)
+foreach(arg ${SUB_PROJECTS})
   add_subdirectory(${arg})
-endforeach(arg ${PROJECT_LIST})
+endforeach(arg ${SUB_PROJECT})
 
-# Add all targets to the build-tree export set
-export(TARGETS ${PROJECT_LIST} FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
-
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export(PACKAGE ${PROJECT_NAME})
-
-# Create the ProjectConfig.cmake and ProjectConfigVersion files
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
-# ... for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
-configure_file(${PROJECT_NAME}Config.cmake.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
-# ... for the install tree
-set(CONF_INCLUDE_DIRS "\${FOOBAR_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-
-configure_file(${PROJECT_NAME}Config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake" @ONLY)
-configure_file(${PROJECT_NAME}ConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
-
-# Install the ProjectConfig.cmake and ProjectConfigVersion.cmake
+##############################
+##  VERSION + CONFIG CMAKE  ##
+##############################
+configure_file(${PROJECT_NAME}Config.cmake.in
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
+configure_file(${PROJECT_NAME}ConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
 install(FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-# Install the export set for use with the install-tree
-install(EXPORT ${PROJECT_NAME}Targets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
