@@ -16,30 +16,10 @@ find_package(OpenSceneGraph 2.8 REQUIRED COMPONENTS osg osgViewer)
 include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 # The file list for this project
-set(_HDRS
-  include/viewer/type.hpp
-  include/viewer/adapter_widget.hpp
-  include/viewer/image_geometry.hpp
-  include/viewer/image_viewer_2d.hpp
-	include/viewer/image_viewer_2d_widget.hpp
-	include/viewer/image_viewer_3d.hpp
-	include/viewer/image_viewer_3d_widget.hpp
-	include/viewer/osg_headers.hpp
-	include/viewer/point_cloud_geometry.hpp
-	include/viewer/tools.hpp
-  )
+file(GLOB_RECURSE _HDRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*)
 qt4_wrap_cpp(_MOC_SRCS ${_HDRS})
+file(GLOB_RECURSE _SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*)
 
-set(_SRCS
-  src/adapter_widget.cpp
-  src/image_geometry.cpp
-  src/image_viewer_2d.cpp
-  src/image_viewer_2d_widget.cpp
-  src/image_viewer_3d.cpp
-  src/image_viewer_3d_widget.cpp
-  src/point_cloud_geometry.cpp
-  src/tools.cpp
-	)
 add_library(${PROJECT_NAME} SHARED ${_HDRS} ${_SRCS} ${_MOC_SRCS})
 target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}

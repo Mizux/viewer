@@ -6,10 +6,8 @@ find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
-include_directories(${viewer_INCLUDE_DIRS})
-
 # The file list for this project
-set(_SRCS src/main.cpp)
+file(GLOB_RECURSE _SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*)
 
 add_executable(${PROJECT_NAME} ${_SRCS})
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES}	viewer)
