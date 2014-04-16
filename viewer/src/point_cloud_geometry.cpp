@@ -28,7 +28,7 @@ DrawablePtr createPointCloud(
 	osg::ref_ptr<osg::Vec3Array> paroVertices = new osg::Vec3Array();
 	osg::ref_ptr<osg::Vec3Array> paroNormals = new osg::Vec3Array();
 	osg::ref_ptr<osg::Vec4Array> paroColors = new osg::Vec4Array();
-	
+
 	//! <LI>Setup Vertices Array.
 	unsigned int uiCount=0;
 	unsigned int uiLoop;
@@ -43,16 +43,16 @@ DrawablePtr createPointCloud(
 	unsigned int uiXmax = p_uiImageWidth/2 + p_uiImageWidth/iStride/2;
 	unsigned int uiYmin = p_uiImageHeight/2 - p_uiImageHeight/iStride/2;
 	unsigned int uiYmax = p_uiImageHeight/2 + p_uiImageHeight/iStride/2;
-	
+
 	for(unsigned int uiY=uiYmin; uiY < uiYmax/*p_uiImageHeight*/; uiY++/*=iStride*/)
 	{
 		for(unsigned int uiX=uiXmin; uiX < uiXmax/*p_uiImageWidth*/; uiX++/*=iStride*/)
 		{
 			uiLoop = uiY*p_uiImageWidth + uiX;
-			
-      if (isnormal(pX[uiLoop]) == 0 ||
-          isnormal(pY[uiLoop]) == 0 ||
-          isnormal(pZ[uiLoop]) == 0)
+
+      if (std::isnormal(pX[uiLoop]) == 0 ||
+          std::isnormal(pY[uiLoop]) == 0 ||
+          std::isnormal(pZ[uiLoop]) == 0)
 				continue;
 
       if (0.0f != pX[uiLoop] && 0.0f != pY[uiLoop] && RANGE_MIN <= pZ[uiLoop] && RANGE_MAX >= pZ[uiLoop])
@@ -70,7 +70,7 @@ DrawablePtr createPointCloud(
 
 	//! <LI>Attach Normals Array to Geometric Node.
 	poGeometry->setNormalArray(paroNormals.get());
-	
+
 	//! <LI>Compute Delaunay Triangulation
 	{
 		osg::ref_ptr<osgUtil::DelaunayTriangulator> poTriangulator = new osgUtil::DelaunayTriangulator(
@@ -88,10 +88,10 @@ DrawablePtr createPointCloud(
 			(*paroNormals)[uiLoop][2] = -(*paroNormals)[uiLoop][2];
 	}
 
-	//! <LI>Build Z Color Map 
+	//! <LI>Build Z Color Map
 	{
 		// Scale Color
-		float fMin = -0.5f;	
+		float fMin = -0.5f;
 		float fMax = 0.5f;
 		for(unsigned int uiLoop=0; uiLoop < paroVertices->size(); uiLoop++)
 		{
@@ -122,11 +122,11 @@ struct CPlop
 	unsigned char ucGreen;
 	unsigned char ucBlue;
 
-	//! @warning see Vec3f in OSG source code, it must be !!! THE SAME ALGORITHM !!! 
+	//! @warning see Vec3f in OSG source code, it must be !!! THE SAME ALGORITHM !!!
 	bool operator()(
 			struct CPlop p_oI,
 			struct CPlop p_oJ)
-	{ 
+	{
 		if (p_oI.fX < p_oJ.fX) return true;
 		else if (p_oI.fX > p_oJ.fX) return false;
 		else if (p_oI.fY < p_oJ.fY) return true;
@@ -161,9 +161,9 @@ DrawablePtr CreateTexturedPointCloud(
 	unsigned int uiLoop;
 
 	std::cerr << "OSG: Total Point Number: " << p_uiImageWidth*p_uiImageHeight << std::endl;
-	
+
 	int iStride=1;
-	unsigned int uiXmin = 0; 
+	unsigned int uiXmin = 0;
 	unsigned int uiXmax = p_uiImageWidth;
 	unsigned int uiYmin = 0;
 	unsigned int uiYmax = p_uiImageHeight;
@@ -173,16 +173,16 @@ DrawablePtr CreateTexturedPointCloud(
 		iStride++;
 	}
 	std::cerr << "OSG: Stride: " << iStride << std::endl;
-	
+
 	for(unsigned int uiY=uiYmin; uiY < uiYmax; uiY+=iStride)
 	{
 		for(unsigned int uiX=uiXmin; uiX < uiXmax; uiX+=iStride)
 		{
 			uiLoop = uiY*p_uiImageWidth + uiX;
 
-			if (isnormal(p_pfX[uiLoop]) == 0 ||
-					isnormal(p_pfY[uiLoop]) == 0 ||
-					isnormal(p_pfZ[uiLoop]) == 0)
+			if (std::isnormal(p_pfX[uiLoop]) == 0 ||
+					std::isnormal(p_pfY[uiLoop]) == 0 ||
+					std::isnormal(p_pfZ[uiLoop]) == 0)
 				continue;
 
 			if (0.0f != p_pfX[uiLoop] && 0.0f != p_pfY[uiLoop] && RANGE_MIN <= p_pfZ[uiLoop] && RANGE_MAX >= p_pfZ[uiLoop])
@@ -191,7 +191,7 @@ DrawablePtr CreateTexturedPointCloud(
 				paroVertices->push_back(osg::Vec3f(p_pfX[uiLoop], p_pfY[uiLoop], p_pfZ[uiLoop]));
 				paroNormals->push_back(osg::Vec3f(0.0f, 0.0f, 1.0f));
 				paroColors->push_back(osg::Vec4f(1.0f,	1.0f,	1.0f,	1.0f));
-				
+
 				oTmp.fX = p_pfX[uiLoop];
 				oTmp.fY = p_pfY[uiLoop];
 				oTmp.fZ = p_pfZ[uiLoop];
@@ -246,7 +246,7 @@ DrawablePtr CreateTexturedPointCloud(
 			(*paroNormals)[uiLoop][2] = -(*paroNormals)[uiLoop][2];
 	}
 
-	//! <LI>Build Z Color Map 
+	//! <LI>Build Z Color Map
 	{
 		std::sort(aroPlop.begin(), aroPlop.end(), myPlop);
 		for(unsigned int uiVerticesLoop=0; uiVerticesLoop < paroVertices->size(); uiVerticesLoop++)
