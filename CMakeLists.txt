@@ -3,6 +3,7 @@ project(Viewer)
 
 # Set this on if you need verbose output from CMake
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ################################
 ######  Compilation Flags ######
