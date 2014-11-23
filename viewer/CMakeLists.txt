@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 project(Viewer)
 
-set(BOOST_ROOT /home/clemolgat/.local/share/qi/toolchains/master-linux64/boost)
+#####################
+##  Documentation  ##
+#####################
+add_subdirectory("doc")
+
+###################
+##  Compilation  ##
+###################
+# Boost Setting
 find_package(Boost REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
