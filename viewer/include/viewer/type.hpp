@@ -1,7 +1,7 @@
 //! @file
 
-#ifndef VIWER_TYPE_HPP
-#define VIWER_TYPE_HPP
+#ifndef VIEWER_TYPE_HPP
+#define VIEWER_TYPE_HPP
 
 #include <osg/ref_ptr>
 #include <osg/Drawable>

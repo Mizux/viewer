@@ -26,7 +26,7 @@ bool ImageViewer3DWidget::slotLoadImage(void)
   QString fileName =
       QFileDialog::getOpenFileName(this, "Open Node File", QDir(".").absolutePath());
 
-  osg::Node * tmp = osgDB::readNodeFile(fileName.toStdString());
+  //osg::Node * tmp = osgDB::readNodeFile(fileName.toStdString());
   //! @bug not working...
   //_imageViewer3D->slotSet3DImage(tmp);
 
