@@ -6,35 +6,27 @@
 #include <QtGui/QFileDialog>
 #include <osgDB/ReadFile>
 
-namespace Viewer
-{
+namespace Viewer {
 
-ImageViewer3DWidget::ImageViewer3DWidget(QWidget *parent) :
-  QWidget(parent),
-  _loadButton(0),
-  _imageViewer3D(0)
-{
+ImageViewer3DWidget::ImageViewer3DWidget(QWidget *parent)
+    : QWidget(parent), _loadButton(0), _imageViewer3D(0) {
   _setupWidget();
 }
 
-ImageViewer3DWidget::~ImageViewer3DWidget()
-{
-}
+ImageViewer3DWidget::~ImageViewer3DWidget() {}
 
-bool ImageViewer3DWidget::slotLoadImage(void)
-{
-  QString fileName =
-      QFileDialog::getOpenFileName(this, "Open Node File", QDir(".").absolutePath());
+bool ImageViewer3DWidget::slotLoadImage(void) {
+  QString fileName = QFileDialog::getOpenFileName(this, "Open Node File",
+                                                  QDir(".").absolutePath());
 
-  //osg::Node * tmp = osgDB::readNodeFile(fileName.toStdString());
+  // osg::Node * tmp = osgDB::readNodeFile(fileName.toStdString());
   //! @bug not working...
   //_imageViewer3D->slotSet3DImage(tmp);
 
   return true;
 }
 
-void ImageViewer3DWidget::_setupWidget()
-{
+void ImageViewer3DWidget::_setupWidget() {
   setObjectName("3D Image Viewer Widget");
   setLayout(new QVBoxLayout(this));
 
@@ -44,14 +36,10 @@ void ImageViewer3DWidget::_setupWidget()
   layout()->addWidget(_loadButton);
 
   _imageViewer3D = new ImageViewer3D(this);
-  _imageViewer3D->setMinimumSize(320,240);
+  _imageViewer3D->setMinimumSize(320, 240);
   _imageViewer3D->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout()->addWidget(_imageViewer3D);
 
-  QWidget::connect(
-        _loadButton,
-        SIGNAL(clicked()),
-        SLOT(slotLoadImage()));
+  QWidget::connect(_loadButton, SIGNAL(clicked()), SLOT(slotLoadImage()));
 }
-
 }

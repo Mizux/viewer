@@ -9,33 +9,31 @@
 
 #include "image_viewer_3d.hpp"
 
-namespace Viewer
-{
-	//! @class C3DImageViewerWidget
-  class ImageViewer3DWidget : public QWidget
-	{
-		Q_OBJECT
+namespace Viewer {
+//! @class C3DImageViewerWidget
+class ImageViewer3DWidget : public QWidget {
+  Q_OBJECT
 
-      ImageViewer3DWidget(const ImageViewer3DWidget&);
-		// intentionally undefined
-    ImageViewer3DWidget& operator=(const ImageViewer3DWidget&);
+  ImageViewer3DWidget(const ImageViewer3DWidget &);
+  // intentionally undefined
+  ImageViewer3DWidget &operator=(const ImageViewer3DWidget &);
 
-		public:
-			//! @brief Constructor.
-      ImageViewer3DWidget(QWidget *parent = 0);
-	
-			//! @brief Destructor.
-      virtual ~ImageViewer3DWidget();
+ public:
+  //! @brief Constructor.
+  ImageViewer3DWidget(QWidget *parent = 0);
 
-			public slots:
-			bool slotLoadImage(void);
+  //! @brief Destructor.
+  virtual ~ImageViewer3DWidget();
 
-	private:
-    QPushButton *_loadButton;
-    Viewer::ImageViewer3D *_imageViewer3D;
+ public slots:
+  bool slotLoadImage(void);
 
-    void _setupWidget();
-	};
-} // DataGrabberGUI
+ private:
+  QPushButton *_loadButton;
+  Viewer::ImageViewer3D *_imageViewer3D;
 
-#endif // end of include guard: 3D_IMAGE_VIEWER_HPP
+  void _setupWidget();
+};
+}  // DataGrabberGUI
+
+#endif  // end of include guard: 3D_IMAGE_VIEWER_HPP
