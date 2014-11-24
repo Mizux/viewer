@@ -1,10 +1,11 @@
 /// @file
 
 #include <viewer/point_cloud_geometry.hpp>
-#include <viewer/tools.hpp>
 
+#include <cmath>
 #include <osg/Geometry>
 #include <osgUtil/DelaunayTriangulator>
+#include <viewer/tools.hpp>
 
 #define RANGE_MAX 1.0f
 #define RANGE_MIN -1.0f
@@ -28,7 +29,7 @@ DrawablePtr createPointCloud(const float *pX, const float *pY, const float *pZ,
   unsigned int uiCount = 0;
   unsigned int uiLoop;
 
-  int iStride = 1;
+  unsigned int iStride = 1;
   while (p_uiImageWidth * p_uiImageHeight / iStride / iStride > MAX_POINT) {
     iStride++;
   }
@@ -152,7 +153,7 @@ DrawablePtr CreateTexturedPointCloud(const float *p_pfX, const float *p_pfY,
   std::cerr << "OSG: Total Point Number: " << p_uiImageWidth *p_uiImageHeight
             << std::endl;
 
-  int iStride = 1;
+  unsigned int iStride = 1;
   unsigned int uiXmin = 0;
   unsigned int uiXmax = p_uiImageWidth;
   unsigned int uiYmin = 0;
