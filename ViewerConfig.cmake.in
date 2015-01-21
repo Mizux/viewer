@@ -1,0 +1,18 @@
+# - Config file for the Viewer package
+# It defines the following variables
+#  VIEWER_INCLUDE_DIRS - include directories for Viewer
+#  VIEWER_LIBRARIES    - libraries to link against
+#  VIEWER_EXECUTABLE   - the executable
+
+# Compute paths
+get_filename_component(VIEWER_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(VIEWER_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET foo AND NOT Viewer_BINARY_DIR)
+  include("${VIEWER_CMAKE_DIR}/ViewerTargets.cmake")
+endif()
+
+# These are IMPORTED targets created by FooBarTargets.cmake
+set(VIEWER_LIBRARIES viewer)
+set(VIEWER_EXECUTABLE viewerApp)

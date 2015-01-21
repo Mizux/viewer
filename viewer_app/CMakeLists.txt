@@ -1,16 +1,24 @@
 cmake_minimum_required(VERSION 2.8)
-set(_NAME ViewerApp)
 
+###################
+##  Compilation  ##
+###################
 # Qt Setting
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
-include_directories(SYSTEM ${Viewer_INCLUDE_DIRS})
+set(_NAME viewerApp)
+
+include_directories(../viewer/include)
 
 # The file list for this project
 set(_SRCS src/main.cpp)
 
 add_executable(${_NAME} ${_SRCS})
-target_link_libraries(${_NAME} ${QT_LIBRARIES} Viewer)
-install(TARGETS ${_NAME} DESTINATION .)
+target_link_libraries(${_NAME} viewer)
+
+install(TARGETS ${_NAME}
+	# IMPORTANT: Add the bar executable to the "export-set"
+	EXPORT ViewerTargets
+	RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)

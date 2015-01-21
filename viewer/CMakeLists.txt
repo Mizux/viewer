@@ -22,17 +22,15 @@ add_definitions(${QT_DEFINITIONS})
 find_package(OpenSceneGraph 2.8 REQUIRED COMPONENTS osg osgViewer)
 include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-set(_NAME Viewer)
+set(_NAME viewer)
 include_directories("include")
-set(${_NAME}_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  CACHE PATH "${_NAME} include path")
 
 # The file list for this project
 set(_HDRS
-  include/viewer/type.hpp
-  include/viewer/adapter_widget.hpp
-  include/viewer/image_geometry.hpp
-  include/viewer/image_viewer_2d.hpp
+	include/viewer/type.hpp
+	include/viewer/adapter_widget.hpp
+	include/viewer/image_geometry.hpp
+	include/viewer/image_viewer_2d.hpp
 	include/viewer/image_viewer_2d_widget.hpp
 	include/viewer/image_viewer_3d.hpp
 	include/viewer/image_viewer_3d_widget.hpp
@@ -42,18 +40,26 @@ set(_HDRS
 qt4_wrap_cpp(_MOC_SRCS ${_HDRS})
 
 set(_SRCS
-  src/adapter_widget.cpp
-  src/image_geometry.cpp
-  src/image_viewer_2d.cpp
-  src/image_viewer_2d_widget.cpp
-  src/image_viewer_3d.cpp
-  src/image_viewer_3d_widget.cpp
-  src/point_cloud_geometry.cpp
-  src/tools.cpp)
+	src/adapter_widget.cpp
+	src/image_geometry.cpp
+	src/image_viewer_2d.cpp
+	src/image_viewer_2d_widget.cpp
+	src/image_viewer_3d.cpp
+	src/image_viewer_3d_widget.cpp
+	src/point_cloud_geometry.cpp
+	src/tools.cpp)
 
 add_library(${_NAME} SHARED ${_HDRS} ${_SRCS} ${_MOC_SRCS})
 target_link_libraries(${_NAME}
-  ${Boost_LIBRARIES}
-  ${QT_LIBRARIES}
-  ${OPENSCENEGRAPH_LIBRARIES})
-install(TARGETS ${_NAME} DESTINATION .)
+	${Boost_LIBRARIES}
+	${QT_LIBRARIES}
+	${OPENSCENEGRAPH_LIBRARIES})
+
+set_target_properties(${_NAME} PROPERTIES PUBLIC_HEADER "${_HDRS}")
+
+install(TARGETS ${_NAME}
+	# IMPORTANT: Add the viewer library to the "export-set"
+	EXPORT ViewerTargets
+	RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
+	LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
+	PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/viewer" COMPONENT dev)
