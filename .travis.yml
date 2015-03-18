@@ -1,7 +1,8 @@
 language: cpp
 
 compiler:
- - clang
+# ubuntu osg can't compile with clang http://forum.openscenegraph.org/viewtopic.php?t=10121
+# - clang
  - gcc
 
 env:
