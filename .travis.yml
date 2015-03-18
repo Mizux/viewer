@@ -23,7 +23,7 @@ before_install:
   - sudo apt-get install -qq libqt4-dev
   - if [ "$ARCH" = "x86" ]; then sudo apt-get install -qq g++-multilib libc6-dbg:i386; fi
 
-install: true
+#install: true
 
 before_script:
     - mkdir build
