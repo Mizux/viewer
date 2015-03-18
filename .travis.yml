@@ -1,0 +1,39 @@
+language: cpp
+
+compiler:
+ - clang
+ - gcc
+
+env:
+  matrix:
+    - CONF=debug   ARCH=x86_64
+    - CONF=release ARCH=x86_64
+    - CONF=debug   ARCH=x86
+    - CONF=release ARCH=x86
+  global:
+    - ARCH_FLAGS_x86='-m32'
+    - ARCH_FLAGS_x86_64=''
+    - secure: "todo"
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq cmake doxygen valgrind
+  - sudo apt-get install -qq libboost-all-dev
+  - sudo apt-get install -qq libopenscenegraph-dev
+  - sudo apt-get install -qq libqt4-dev
+  - if [ "$ARCH" = "x86" ]; then sudo apt-get install -qq g++-multilib libc6-dbg:i386; fi
+
+install: true
+
+before_script:
+    - mkdir build
+    - >
+        eval "ARCH_FLAGS=\${ARCH_FLAGS_${ARCH}}" ;
+        (cd build && cmake
+        -DCMAKE_VERBOSE_MAKEFILE=ON
+        -DCMAKE_BUILD_TYPE=$CONF
+        -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" ..)
+script:
+  - cd build
+  - make
+  - make doc
