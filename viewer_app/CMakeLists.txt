@@ -10,8 +10,6 @@ add_definitions(${QT_DEFINITIONS})
 
 set(_NAME viewerApp)
 
-include_directories(../viewer/include)
-
 # The file list for this project
 set(_SRCS src/main.cpp)
 

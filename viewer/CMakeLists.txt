@@ -23,11 +23,9 @@ find_package(OpenSceneGraph 2.8 REQUIRED COMPONENTS osg osgViewer)
 include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(_NAME viewer)
-include_directories("include")
 
 # The file list for this project
 set(_HDRS
-	include/viewer/type.hpp
 	include/viewer/adapter_widget.hpp
 	include/viewer/image_geometry.hpp
 	include/viewer/image_viewer_2d.hpp
@@ -36,7 +34,8 @@ set(_HDRS
 	include/viewer/image_viewer_3d_widget.hpp
 	include/viewer/osg_headers.hpp
 	include/viewer/point_cloud_geometry.hpp
-	include/viewer/tools.hpp)
+	include/viewer/tools.hpp
+	include/viewer/type.hpp)
 qt4_wrap_cpp(_MOC_SRCS ${_HDRS})
 
 set(_SRCS
@@ -54,9 +53,11 @@ target_link_libraries(${_NAME}
 	${Boost_LIBRARIES}
 	${QT_LIBRARIES}
 	${OPENSCENEGRAPH_LIBRARIES})
+target_include_directories(${_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
 
 set_target_properties(${_NAME} PROPERTIES PUBLIC_HEADER "${_HDRS}")
-
 install(TARGETS ${_NAME}
 	# IMPORTANT: Add the viewer library to the "export-set"
 	EXPORT ViewerTargets
